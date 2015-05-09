@@ -37,6 +37,8 @@ public class ReaderFragment extends Fragment {
 
     private static final String FULL_TEXT_ARG = "full_text_arg";
     private static final String MARKER_LIST_ARG = "marker_list_arg";
+    private static final String SELECTED_MARKER_ARG = "selected_marker_arg";
+
     private static final int CHANGE_PAGE_MARGIN = 150;
     private static final int TEXT_OFFSET_CHARACTERS = 100;
 
@@ -45,13 +47,15 @@ public class ReaderFragment extends Fragment {
     private String fullText;
     private String cropText;
     private int startTextPosition, endTextPosition;
+    private int selectedMarker;
 
     @InjectView(R.id.tv_full_text) TextView fullTextView;
 
-    public static ReaderFragment getInstance(String fullText, ArrayList<Marker> markerList){
+    public static ReaderFragment getInstance(String fullText, ArrayList<Marker> markerList, int selectedMarker){
         Bundle bundle = new Bundle();
         bundle.putString(FULL_TEXT_ARG, fullText);
         bundle.putParcelableArrayList(MARKER_LIST_ARG, markerList);
+        bundle.putInt(SELECTED_MARKER_ARG, selectedMarker);
         ReaderFragment fragment = new ReaderFragment();
         fragment.setArguments(bundle);
         return fragment;
@@ -62,10 +66,11 @@ public class ReaderFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_reader, container, false);
         ButterKnife.inject(this, view);
+        selectedMarker = getArguments().getInt(SELECTED_MARKER_ARG);
         markerList = getArguments().getParcelableArrayList(MARKER_LIST_ARG);
         fullText = getArguments().getString(FULL_TEXT_ARG);
-        startTextPosition = Math.max(markerList.get(0).getSelectionStart() - TEXT_OFFSET_CHARACTERS, 0);
-        endTextPosition = Math.min(markerList.get(0).getSelectionEnd() + TEXT_OFFSET_CHARACTERS, fullText.length()-1);
+        startTextPosition = Math.max(markerList.get(selectedMarker).getSelectionStart() - TEXT_OFFSET_CHARACTERS, selectedMarker);
+        endTextPosition = Math.min(markerList.get(selectedMarker).getSelectionEnd() + TEXT_OFFSET_CHARACTERS, fullText.length()-1);
 
         cropText = fullText.substring(startTextPosition, endTextPosition);
         fullTextView.setText(cropText);
@@ -83,23 +88,22 @@ public class ReaderFragment extends Fragment {
         }
 
         for(Marker marker : markerList) {
-            if(isMarkerVisible(marker)) {
                 BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(marker.getType().getBackgroundColor());
                 ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(marker.getType().getForegroundColor());
                 spannable.setSpan(backgroundColorSpan, marker.getSelectionStart(), marker.getSelectionEnd(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 spannable.setSpan(foregroundColorSpan, marker.getSelectionStart(), marker.getSelectionEnd(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-            }
         }
 
         fullTextView.setText(spannable);
 
     }
 
-    private boolean isMarkerVisible(Marker marker){
-        if(marker.getSelectionStart() >= startTextPosition || marker.getSelectionEnd() <= endTextPosition){
-            return true;
-        }
-        return false;
+    private int getStartSelection(Marker marker){
+        return 0;
+    }
+
+    private int getEndSelection(Marker marker){
+        return 0;
     }
 
     @Override
