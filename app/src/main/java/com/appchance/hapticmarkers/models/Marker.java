@@ -10,6 +10,7 @@ public class Marker implements Parcelable {
     private MarkerType type;
     private int selectionStart;
     private int selectionEnd;
+    private boolean isVisible;
 
     public Marker(MarkerType type, int selectionStart, int selectionEnd) {
         this.type = type;
@@ -27,6 +28,14 @@ public class Marker implements Parcelable {
 
     public int getSelectionEnd() {
         return selectionEnd;
+    }
+
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    public void setIsVisible(boolean isVisible) {
+        this.isVisible = isVisible;
     }
 
     protected Marker(Parcel in) {

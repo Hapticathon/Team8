@@ -95,10 +95,13 @@ public class ReaderFragment extends Fragment {
             int endSelection = startSelection + (marker.getSelectionEnd() - marker.getSelectionStart());
 
             if(isMarkerInText(marker)) {
+                marker.setIsVisible(true);
                 BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(marker.getType().getBackgroundColor());
                 ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(marker.getType().getForegroundColor());
                 spannable.setSpan(backgroundColorSpan, startSelection, endSelection, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
                 spannable.setSpan(foregroundColorSpan, startSelection, endSelection, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            }else{
+                marker.setIsVisible(false);
             }
         }
 
@@ -124,10 +127,12 @@ public class ReaderFragment extends Fragment {
                 int index = MarkerUtil.getMarkerIndex(markedAreas, y);
 
                 if (index != -1) {
-                    MarkerType markerType = markerList.get(index).getType();
-                    App.vibratePattern(markerType.getPattern());
+                    Marker marker = getVisibleMarker();
+                    if(marker != null) {
+                        MarkerType markerType = marker.getType();
+                        App.vibratePattern(markerType.getPattern());
+                    }
                 }
-
             }
 
             @Override
@@ -135,6 +140,15 @@ public class ReaderFragment extends Fragment {
                 App.vibrateOff();
             }
         }));
+
+    }
+
+    private Marker getVisibleMarker(){
+
+        for(Marker marker : markerList){
+            if(marker.isVisible()) return marker;
+        }
+        return null;
 
     }
 
@@ -214,16 +228,12 @@ public class ReaderFragment extends Fragment {
                             }
                         } else {
                             if (App.TPAD) {
-
                                 ((MainActivity) getActivity()).vibrateOff();
                             } else {
                                 App.vibrateOff();
                             }
                         }
                     }
-
-
-
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -237,6 +247,7 @@ public class ReaderFragment extends Fragment {
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
                         initNextPage();
                     }
+
                     if (App.TPAD) {
                         ((MainActivity) getActivity()).vibrateOff();
                     } else {
@@ -245,7 +256,7 @@ public class ReaderFragment extends Fragment {
                     break;
             }
 
-            return false;
+            return true;
         }
 
         private void initNextPage(){

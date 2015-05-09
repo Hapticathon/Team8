@@ -7,7 +7,7 @@ import android.os.Vibrator;
 public class App extends Application {
 
     public static Vibrator vibrator;
-    public static final boolean TPAD = true;
+    public static final boolean TPAD = false;
     public static boolean isVibrateOn;
 
     @Override
