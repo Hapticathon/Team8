@@ -43,6 +43,7 @@ public class OverviewFragment extends Fragment {
 
     private List<Marker> markers = new ArrayList<>();
     private List<MarkedArea> markedAreas = null;
+    private String data = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +58,6 @@ public class OverviewFragment extends Fragment {
 
         AssetManager assetManager = getActivity().getAssets();
         InputStream is = null;
-        String data = "";
         try {
             is = assetManager.open("text.html");
             data = IOUtils.toString(is);
@@ -66,43 +66,19 @@ public class OverviewFragment extends Fragment {
         }
 
         text.setText(data);
-        text.setOnTouchListener(new View.OnTouchListener() {
+        text.setOnTouchListener(new OnMarkerTouchListener(getActivity(), new OnTapListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent event) {
+            public void onTapListener(int y) {
 
-                if (markedAreas == null) {
-                    Bitmap bitmap = ViewUtil.getViewBitmap(text);
-                    markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
-                    Log.d("HM", "markedAreas: " + markedAreas.toString());
+                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+
+                if (index != -1) {
+
+                    ReaderFragment fragment = ReaderFragment.getInstance(data, markers, index);
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
+
                 }
 
-                int action = event.getAction();
-
-                int y = (int) event.getY();
-
-                switch (action) {
-
-                    case MotionEvent.ACTION_DOWN:
-
-                        break;
-
-                    case MotionEvent.ACTION_MOVE:
-
-                        if (MarkerUtil.isInMarkedArea(markedAreas, y, 150)) {
-                            App.vibrateOn();
-                        } else {
-                            App.vibrateOff();
-                        }
-
-                        break;
-
-                    case MotionEvent.ACTION_UP:
-                        App.vibrateOff();
-                        break;
-                }
-
-
-                return false;
             }
         });
 
@@ -123,7 +99,7 @@ public class OverviewFragment extends Fragment {
             spannable = Spannable.Factory.getInstance().newSpannable(text.getText());
         }
 
-        for(Marker marker : markers) {
+        for (Marker marker : markers) {
 
             MarkerType type = marker.getType();
             int ss = marker.getSelectionStart();
@@ -137,6 +113,77 @@ public class OverviewFragment extends Fragment {
         }
 
         text.setText(spannable);
+
+    }
+
+    public interface OnTapListener {
+        void onTapListener(int y);
+    }
+
+    public class OnMarkerTouchListener implements View.OnTouchListener {
+
+        private GestureDetector gestureDetector;
+        private OnTapListener onTapListener;
+
+        public OnMarkerTouchListener(Context context, OnTapListener onTapListener) {
+            this.gestureDetector = new GestureDetector(context, new GestureListener());
+            this.onTapListener = onTapListener;
+        }
+
+        public void onTap(MotionEvent event) {
+            onTapListener.onTapListener((int) event.getY());
+        }
+
+        public boolean onTouch(View v, MotionEvent event) {
+
+            if (markedAreas == null) {
+                Bitmap bitmap = ViewUtil.getViewBitmap(text);
+                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
+                Log.d("HM", "markedAreas: " + markedAreas.toString());
+            }
+
+            if (gestureDetector.onTouchEvent(event)) {
+                return true;
+            }
+
+            int action = event.getAction();
+
+            int y = (int) event.getY();
+
+            switch (action) {
+
+                case MotionEvent.ACTION_DOWN:
+
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+
+                    if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
+                        App.vibrateOn();
+                    } else {
+                        App.vibrateOff();
+                    }
+
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    App.vibrateOff();
+                    break;
+            }
+
+            return true;
+        }
+
+
+
+        private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                onTap(e);
+                return true;
+            }
+        }
 
     }
 
