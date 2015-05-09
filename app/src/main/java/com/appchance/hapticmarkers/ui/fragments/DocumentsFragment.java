@@ -37,6 +37,7 @@ public class DocumentsFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
+        documentList.clear();
         documentList.add(new Document("Testowy dokument", "text.html"));
         documentList.add(new Document("Wyceny dla Pawła", "text.html"));
         documentList.add(new Document("Pan Tadeusz", "text.html"));
@@ -51,7 +52,7 @@ public class DocumentsFragment extends Fragment {
                 String path = documentList.get(i).getFile();
 
                 OverviewFragment fragment = OverviewFragment.getInstance(title, path);
-                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
 
             }
         });

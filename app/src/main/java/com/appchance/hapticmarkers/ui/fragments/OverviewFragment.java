@@ -95,7 +95,7 @@ public class OverviewFragment extends Fragment {
                 if (index != -1) {
 
                     ReaderFragment fragment = ReaderFragment.getInstance(data, markers, index);
-                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
+                    getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).addToBackStack(null).commit();
 
                 }
 

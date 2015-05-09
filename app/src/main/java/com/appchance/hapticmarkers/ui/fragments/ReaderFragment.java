@@ -222,6 +222,7 @@ public class ReaderFragment extends Fragment {
 
         private void initNextPage(){
 
+            markedAreas = null;
             startTextPosition = endTextPosition;
             endTextPosition = Math.min(startTextPosition + TEXT_OFFSET_CHARACTERS * 2, fullText.length()-1);
             cropText = fullText.substring(startTextPosition, endTextPosition);
@@ -232,6 +233,7 @@ public class ReaderFragment extends Fragment {
 
         private void initPreviousPage(){
 
+            markedAreas = null;
             startTextPosition = Math.max(startTextPosition - TEXT_OFFSET_CHARACTERS * 2, 0);
             endTextPosition = startTextPosition + TEXT_OFFSET_CHARACTERS * 2;
             cropText = fullText.substring(startTextPosition, endTextPosition);
