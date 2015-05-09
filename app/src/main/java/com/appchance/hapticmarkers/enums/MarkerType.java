@@ -5,9 +5,9 @@ import android.graphics.Color;
 
 public enum MarkerType {
 
-    GREEN(Color.parseColor("#FFFFFF"), Color.parseColor("#4CAF50"), new long[] { 0, 250 }),
-    RED(Color.parseColor("#FFFFFF"), Color.parseColor("#F44336"), new long[] { 0, 250, 100, 250  }),
-    BLUE(Color.parseColor("#FFFFFF"), Color.parseColor("#2196F3"), new long[] { 0, 250, 100, 250, 100, 250 });
+    GREEN(Color.parseColor("#FFFFFF"), Color.parseColor("#4CAF50"), new long[] { 0, 100 }),
+    RED(Color.parseColor("#FFFFFF"), Color.parseColor("#F44336"), new long[] { 0, 100, 100, 100  }),
+    BLUE(Color.parseColor("#FFFFFF"), Color.parseColor("#2196F3"), new long[] { 0, 100, 100, 100, 100, 100 });
 
     int foregroundColor;
     int backgroundColor;

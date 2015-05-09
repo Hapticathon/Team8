@@ -3,6 +3,7 @@ package com.appchance.hapticmarkers.utils;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
+import com.appchance.hapticmarkers.enums.MarkerType;
 import com.appchance.hapticmarkers.models.MarkedArea;
 
 import java.util.ArrayList;
@@ -18,7 +19,10 @@ public class MarkerUtil {
         int startY = 0;
 
         List<Integer> spannedColors = new ArrayList<>();
-        spannedColors.add(Color.parseColor("#009688"));
+
+        for (MarkerType markerType : MarkerType.values()) {
+            spannedColors.add(markerType.getBackgroundColor());
+        }
 
         for (int y=0; y < bitmap.getHeight(); y++) {
 
@@ -53,7 +57,7 @@ public class MarkerUtil {
 
     public static boolean isInMarkedArea(List<MarkedArea> markedAreas, int y) {
 
-        int margin = 50;
+        int margin = 10;
 
         for (MarkedArea markedArea : markedAreas) {
 
@@ -66,6 +70,23 @@ public class MarkerUtil {
         }
 
         return false;
+    }
+
+    public static int getMarkerIndex(List<MarkedArea> markedAreas, int y) {
+
+        int margin = 10;
+
+        for (MarkedArea markedArea : markedAreas) {
+
+            int startY = markedArea.getStartY() - margin;
+            int endY = markedArea.getEndY() + margin;
+
+            if (startY - margin < y && endY > y) {
+                return markedAreas.indexOf(markedArea);
+            }
+        }
+
+        return -1;
     }
 
 }

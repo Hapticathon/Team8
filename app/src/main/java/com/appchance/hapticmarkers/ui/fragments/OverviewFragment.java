@@ -1,5 +1,6 @@
 package com.appchance.hapticmarkers.ui.fragments;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -9,6 +10,8 @@ import android.text.Spannable;
 import android.text.Spanned;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,7 +20,9 @@ import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
 import com.appchance.hapticmarkers.R;
+import com.appchance.hapticmarkers.enums.MarkerType;
 import com.appchance.hapticmarkers.models.MarkedArea;
+import com.appchance.hapticmarkers.models.Marker;
 import com.appchance.hapticmarkers.utils.MarkerUtil;
 import com.appchance.hapticmarkers.utils.ViewUtil;
 
@@ -25,6 +30,7 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -35,6 +41,7 @@ public class OverviewFragment extends Fragment {
     @InjectView(R.id.text)
     TextView text;
 
+    private List<Marker> markers = new ArrayList<>();
     private List<MarkedArea> markedAreas = null;
 
     @Override
@@ -59,6 +66,32 @@ public class OverviewFragment extends Fragment {
         }
 
         text.setText(data);
+        text.setOnTouchListener(new OnMarkerTouchListener(getActivity(), new OnSwipeListener() {
+            @Override
+            public void onSwipeLeft(int y) {
+                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+
+                if (index != -1) {
+                    MarkerType markerType = markers.get(index).getType();
+                    App.vibratePattern(markerType.getPattern());
+                }
+
+            }
+
+            @Override
+            public void onSwipeRight(int y) {
+                App.vibrateOff();
+            }
+        }));
+
+        markers.add(new Marker(MarkerType.GREEN, 340, 480));
+        markers.add(new Marker(MarkerType.RED, 680, 750));
+
+        addMarkers(markers);
+
+    }
+
+    private void addMarkers(List<Marker> markers) {
 
         Spannable spannable = null;
 
@@ -68,51 +101,113 @@ public class OverviewFragment extends Fragment {
             spannable = Spannable.Factory.getInstance().newSpannable(text.getText());
         }
 
-        BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(Color.parseColor("#009688"));
-        ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(Color.parseColor("#ffffff"));
-        spannable.setSpan(backgroundColorSpan, 455, 531, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-        spannable.setSpan(foregroundColorSpan, 455, 531, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        for(Marker marker : markers) {
+
+            MarkerType type = marker.getType();
+            int ss = marker.getSelectionStart();
+            int se = marker.getSelectionEnd();
+
+            BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(type.getBackgroundColor());
+            ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(type.getForegroundColor());
+            spannable.setSpan(backgroundColorSpan, ss, se, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            spannable.setSpan(foregroundColorSpan, ss, se, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+        }
 
         text.setText(spannable);
 
-        text.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+    }
 
-                if (markedAreas == null) {
-                    Bitmap bitmap = ViewUtil.getViewBitmap(text);
-                    markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
-                }
+    public interface OnSwipeListener {
 
-                int action = motionEvent.getAction();
+        void onSwipeLeft(int y);
 
-                int y = (int) motionEvent.getY();
+        void onSwipeRight(int y);
+    }
 
-                switch (action) {
+    public class OnMarkerTouchListener implements View.OnTouchListener {
 
-                    case MotionEvent.ACTION_DOWN:
+        private GestureDetector gestureDetector;
+        private OnSwipeListener onSwipeListener;
 
-                        break;
+        public OnMarkerTouchListener(Context context, OnSwipeListener onSwipeListener) {
+            this.gestureDetector = new GestureDetector(context, new GestureListener());
+            this.onSwipeListener = onSwipeListener;
+        }
 
-                    case MotionEvent.ACTION_MOVE:
+        public void onSwipeLeft(int y) {
+            onSwipeListener.onSwipeLeft(y);
+        }
 
-                        if (MarkerUtil.isInMarkedArea(markedAreas, y)) {
-                            App.vibrateOn();
-                        } else {
-                            App.vibrateOff();
-                        }
+        public void onSwipeRight(int y) {
+            onSwipeListener.onSwipeRight(y);
+        }
 
-                        break;
+        public boolean onTouch(View v, MotionEvent event) {
 
-                    case MotionEvent.ACTION_UP:
-                        App.vibrateOff();
-                        break;
-                }
+            if (markedAreas == null) {
+                Bitmap bitmap = ViewUtil.getViewBitmap(text);
+                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
+                Log.d("HM", "markedAreas: " + markedAreas.toString());
+            }
 
+            if(gestureDetector.onTouchEvent(event)) {
                 return true;
             }
-        });
 
+            int action = event.getAction();
+
+            int y = (int) event.getY();
+
+            switch (action) {
+
+                case MotionEvent.ACTION_DOWN:
+
+                    break;
+
+                case MotionEvent.ACTION_MOVE:
+
+                    if (MarkerUtil.isInMarkedArea(markedAreas, y)) {
+                        App.vibrateOn();
+                    } else {
+                        App.vibrateOff();
+                    }
+
+                    break;
+
+                case MotionEvent.ACTION_UP:
+                    App.vibrateOff();
+                    break;
+            }
+
+            return false;
+        }
+
+        private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
+
+            private static final int SWIPE_DISTANCE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                float distanceX = e2.getX() - e1.getX();
+                float distanceY = e2.getY() - e1.getY();
+                if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > SWIPE_DISTANCE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (distanceX > 0) {
+                        onSwipeRight((int) e1.getY());
+                    } else {
+                        onSwipeLeft((int) e1.getY());
+                    }
+                    return true;
+                }
+                return false;
+            }
+        }
     }
 
 }
