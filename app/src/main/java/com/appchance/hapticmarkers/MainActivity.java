@@ -20,7 +20,6 @@ import nxr.tpad.lib.consts.TPadVibration;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private TPadImpl tpad;
 
     @Override
