@@ -1,10 +1,14 @@
 package com.appchance.hapticmarkers.ui.fragments;
 
 import android.content.res.AssetManager;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Layout;
-import android.util.Log;
+import android.text.Spannable;
+import android.text.Spanned;
+import android.text.style.BackgroundColorSpan;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,11 +17,19 @@ import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
 import com.appchance.hapticmarkers.R;
+import com.appchance.hapticmarkers.enums.MarkerType;
+import com.appchance.hapticmarkers.models.MarkedArea;
+import com.appchance.hapticmarkers.models.Marker;
+import com.appchance.hapticmarkers.utils.MarkerUtil;
+import com.appchance.hapticmarkers.utils.ViewUtil;
 
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -27,8 +39,9 @@ public class OverviewFragment extends Fragment {
     @InjectView(R.id.text)
     TextView text;
 
-    String data = "";
-    private int currentTextOffset;
+    private List<MarkedArea> markedAreas = null;
+    private ArrayList<Marker> markerList;
+    private String data = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -43,7 +56,6 @@ public class OverviewFragment extends Fragment {
 
         AssetManager assetManager = getActivity().getAssets();
         InputStream is = null;
-
         try {
             is = assetManager.open("text.html");
             data = IOUtils.toString(is);
@@ -52,32 +64,61 @@ public class OverviewFragment extends Fragment {
         }
 
         text.setText(data);
-        text.setClickable(true);
-        text.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-            }
-        });
+        Spannable spannable = null;
+
+        if (text.getText() instanceof Spannable) {
+            spannable = (Spannable) text.getText();
+        } else {
+            spannable = Spannable.Factory.getInstance().newSpannable(text.getText());
+        }
+
+        BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(Color.parseColor("#009688"));
+        ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(Color.parseColor("#ffffff"));
+        spannable.setSpan(backgroundColorSpan, 455, 531, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+        spannable.setSpan(foregroundColorSpan, 455, 531, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+        markerList = new ArrayList<>();
+        markerList.add(new Marker(MarkerType.GREEN, 200, 300));
+        markerList.add(new Marker(MarkerType.RED, 500, 600));
+
+        text.setText(spannable);
 
         text.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
+            public boolean onTouch(View view, MotionEvent motionEvent) {
 
-                if(event.getAction() == MotionEvent.ACTION_MOVE) {
-                    Layout layout = ((TextView) v).getLayout();
-                    int x = (int) event.getX();
-                    int y = (int) event.getY();
-                    if (layout != null) {
-                        int line = layout.getLineForVertical(y);
-                        int offset = layout.getOffsetForHorizontal(line, x);
-                        currentTextOffset = offset;
-                    }
-                }else if(event.getAction() == MotionEvent.ACTION_UP){
-                    getActivity().getSupportFragmentManager()
-                            .beginTransaction()
-                            .replace(R.id.fragment_container, ReaderFragment.getInstance(data, currentTextOffset))
-                            .commit();
+                if (markedAreas == null) {
+                    Bitmap bitmap = ViewUtil.getViewBitmap(text);
+                    markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
+                }
+
+                int action = motionEvent.getAction();
+
+                int y = (int) motionEvent.getY();
+
+                switch (action) {
+
+                    case MotionEvent.ACTION_DOWN:
+
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+
+                        if (MarkerUtil.isInMarkedArea(markedAreas, y)) {
+                            App.vibrateOn();
+                        } else {
+                            App.vibrateOff();
+                        }
+
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        App.vibrateOff();
+                        getActivity().getSupportFragmentManager()
+                                .beginTransaction()
+                                .replace(R.id.fragment_container, ReaderFragment.getInstance(data, markerList)).commit();
+                        break;
                 }
 
                 return true;
