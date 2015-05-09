@@ -117,7 +117,7 @@ public class OverviewFragment extends Fragment {
         });
 
         markers.add(new Marker(MarkerType.GREEN, 340, 480));
-        markers.add(new Marker(MarkerType.RED, 1280, 1450));
+        markers.add(new Marker(MarkerType.RED, 1877, 2049));
 
 
         Log.d("HM", "start: " + System.currentTimeMillis());
@@ -191,7 +191,11 @@ public class OverviewFragment extends Fragment {
 
                     if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
                         if (App.TPAD) {
-                            ((MainActivity) getActivity()).vibrateOn();
+                            if (MarkerUtil.getMarkerIndex(markedAreas, y) == 1) {
+                                ((MainActivity) getActivity()).vibrateOn(0.5f);
+                            } else {
+                                ((MainActivity) getActivity()).vibrateOn();
+                            }
                         } else {
                             App.vibrateOn();
                         }
