@@ -41,7 +41,7 @@ public class OverviewFragment extends Fragment {
     @InjectView(R.id.text)
     TextView text;
 
-    private List<Marker> markers = new ArrayList<>();
+    private ArrayList<Marker> markers = new ArrayList<>();
     private List<MarkedArea> markedAreas = null;
     private String data = "";
 
@@ -80,7 +80,7 @@ public class OverviewFragment extends Fragment {
                 }
 
             }
-        });
+        }));
 
         markers.add(new Marker(MarkerType.GREEN, 340, 480));
         markers.add(new Marker(MarkerType.RED, 1280, 1450));
