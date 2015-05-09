@@ -18,4 +18,11 @@ public class MarkedArea {
         return endY;
     }
 
+    @Override
+    public String toString() {
+        return "MarkedArea{" +
+                "startY=" + startY +
+                ", endY=" + endY +
+                '}';
+    }
 }

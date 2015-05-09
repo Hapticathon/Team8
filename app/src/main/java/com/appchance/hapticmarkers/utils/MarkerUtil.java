@@ -55,9 +55,7 @@ public class MarkerUtil {
         return markedAreas;
     }
 
-    public static boolean isInMarkedArea(List<MarkedArea> markedAreas, int y) {
-
-        int margin = 10;
+    public static boolean isInMarkedArea(List<MarkedArea> markedAreas, int y, int margin) {
 
         for (MarkedArea markedArea : markedAreas) {
 

@@ -5,8 +5,8 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <fragment
-        android:name="com.appchance.hapticmarkers.ui.fragments.OverviewFragment"
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

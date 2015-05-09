@@ -66,26 +66,48 @@ public class OverviewFragment extends Fragment {
         }
 
         text.setText(data);
-        text.setOnTouchListener(new OnMarkerTouchListener(getActivity(), new OnSwipeListener() {
+        text.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onSwipeLeft(int y) {
-                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+            public boolean onTouch(View view, MotionEvent event) {
 
-                if (index != -1) {
-                    MarkerType markerType = markers.get(index).getType();
-                    App.vibratePattern(markerType.getPattern());
+                if (markedAreas == null) {
+                    Bitmap bitmap = ViewUtil.getViewBitmap(text);
+                    markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
+                    Log.d("HM", "markedAreas: " + markedAreas.toString());
                 }
 
-            }
+                int action = event.getAction();
 
-            @Override
-            public void onSwipeRight(int y) {
-                App.vibrateOff();
+                int y = (int) event.getY();
+
+                switch (action) {
+
+                    case MotionEvent.ACTION_DOWN:
+
+                        break;
+
+                    case MotionEvent.ACTION_MOVE:
+
+                        if (MarkerUtil.isInMarkedArea(markedAreas, y, 150)) {
+                            App.vibrateOn();
+                        } else {
+                            App.vibrateOff();
+                        }
+
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        App.vibrateOff();
+                        break;
+                }
+
+
+                return false;
             }
-        }));
+        });
 
         markers.add(new Marker(MarkerType.GREEN, 340, 480));
-        markers.add(new Marker(MarkerType.RED, 680, 750));
+        markers.add(new Marker(MarkerType.RED, 1280, 1450));
 
         addMarkers(markers);
 
@@ -116,98 +138,6 @@ public class OverviewFragment extends Fragment {
 
         text.setText(spannable);
 
-    }
-
-    public interface OnSwipeListener {
-
-        void onSwipeLeft(int y);
-
-        void onSwipeRight(int y);
-    }
-
-    public class OnMarkerTouchListener implements View.OnTouchListener {
-
-        private GestureDetector gestureDetector;
-        private OnSwipeListener onSwipeListener;
-
-        public OnMarkerTouchListener(Context context, OnSwipeListener onSwipeListener) {
-            this.gestureDetector = new GestureDetector(context, new GestureListener());
-            this.onSwipeListener = onSwipeListener;
-        }
-
-        public void onSwipeLeft(int y) {
-            onSwipeListener.onSwipeLeft(y);
-        }
-
-        public void onSwipeRight(int y) {
-            onSwipeListener.onSwipeRight(y);
-        }
-
-        public boolean onTouch(View v, MotionEvent event) {
-
-            if (markedAreas == null) {
-                Bitmap bitmap = ViewUtil.getViewBitmap(text);
-                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
-                Log.d("HM", "markedAreas: " + markedAreas.toString());
-            }
-
-            if(gestureDetector.onTouchEvent(event)) {
-                return true;
-            }
-
-            int action = event.getAction();
-
-            int y = (int) event.getY();
-
-            switch (action) {
-
-                case MotionEvent.ACTION_DOWN:
-
-                    break;
-
-                case MotionEvent.ACTION_MOVE:
-
-                    if (MarkerUtil.isInMarkedArea(markedAreas, y)) {
-                        App.vibrateOn();
-                    } else {
-                        App.vibrateOff();
-                    }
-
-                    break;
-
-                case MotionEvent.ACTION_UP:
-                    App.vibrateOff();
-                    break;
-            }
-
-            return false;
-        }
-
-        private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
-
-            private static final int SWIPE_DISTANCE_THRESHOLD = 100;
-            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
-
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                float distanceX = e2.getX() - e1.getX();
-                float distanceY = e2.getY() - e1.getY();
-                if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > SWIPE_DISTANCE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                    if (distanceX > 0) {
-                        onSwipeRight((int) e1.getY());
-                    } else {
-                        onSwipeLeft((int) e1.getY());
-                    }
-                    return true;
-                }
-                return false;
-            }
-        }
     }
 
 }
