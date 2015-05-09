@@ -9,6 +9,7 @@ import com.appchance.hapticmarkers.ui.fragments.DocumentsFragment;
 
 import butterknife.ButterKnife;
 import nxr.tpad.lib.TPadImpl;
+import nxr.tpad.lib.consts.TPadVibration;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,4 +53,13 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public void vibrateOn() {
+        tpad.sendVibration(TPadVibration.SQUARE, 200, 1);
+    }
+
+    public void vibrateOff() {
+        tpad.turnOff();
+    }
+
 }

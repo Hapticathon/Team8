@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
+import com.appchance.hapticmarkers.MainActivity;
 import com.appchance.hapticmarkers.R;
 import com.appchance.hapticmarkers.enums.MarkerType;
 import com.appchance.hapticmarkers.models.MarkedArea;
@@ -188,17 +189,36 @@ public class ReaderFragment extends Fragment {
 
                     if (event.getY() < CHANGE_PAGE_MARGIN) {
                         //PREVIOUS PAGE
-                        if(!App.isIsVibrateOn())
-                            App.vibrateOn();
+                        if(!App.isIsVibrateOn()) {
+                            if (App.TPAD) {
+                                ((MainActivity) getActivity()).vibrateOn();
+                            } else {
+                                App.vibrateOn();
+                            }
+                        }
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
                         //NEXT PAGE
-                        if(!App.isIsVibrateOn())
-                            App.vibrateOn();
+                        if(!App.isIsVibrateOn()) {
+                            if (App.TPAD) {
+                                ((MainActivity) getActivity()).vibrateOn();
+                            } else {
+                                App.vibrateOn();
+                            }
+                        }
                     } else {
                         if (MarkerUtil.isInMarkedArea(markedAreas, y, 10)) {
-                            App.vibrateOn();
+                            if (App.TPAD) {
+                                ((MainActivity) getActivity()).vibrateOn();
+                            } else {
+                                App.vibrateOn();
+                            }
                         } else {
-                            App.vibrateOff();
+                            if (App.TPAD) {
+
+                                ((MainActivity) getActivity()).vibrateOff();
+                            } else {
+                                App.vibrateOff();
+                            }
                         }
                     }
 
@@ -207,13 +227,21 @@ public class ReaderFragment extends Fragment {
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    App.vibrateOff();
+                    if (App.TPAD) {
+                        ((MainActivity) getActivity()).vibrateOff();
+                    } else {
+                        App.vibrateOff();
+                    }
                     if (event.getY() < CHANGE_PAGE_MARGIN) {
                         initPreviousPage();
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
                         initNextPage();
                     }
-                    App.vibrateOff();
+                    if (App.TPAD) {
+                        ((MainActivity) getActivity()).vibrateOff();
+                    } else {
+                        App.vibrateOff();
+                    }
                     break;
             }
 
