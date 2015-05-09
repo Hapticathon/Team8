@@ -17,6 +17,10 @@ public class App extends Application {
         
     }
 
+    public static void viratePattern(long[] pattern) {
+        vibrator.vibrate(pattern, 1);
+    }
+
     public static void vibrateOn() {
         vibrator.vibrate(10 * 1000);
     }
