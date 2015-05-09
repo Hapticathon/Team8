@@ -116,8 +116,9 @@ public class OverviewFragment extends Fragment {
             }
         });
 
-        markers.add(new Marker(MarkerType.GREEN, 340, 480));
-        markers.add(new Marker(MarkerType.RED, 1877, 2049));
+        markers.add(new Marker(MarkerType.GREEN, 540, 680));
+        markers.add(new Marker(MarkerType.RED, 2877, 3049));
+        markers.add(new Marker(MarkerType.BLUE, 6077, 6449));
 
 
         Log.d("HM", "start: " + System.currentTimeMillis());

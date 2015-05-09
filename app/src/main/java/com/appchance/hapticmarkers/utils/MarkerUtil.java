@@ -28,7 +28,7 @@ public class MarkerUtil {
 
             boolean containsMarker = false;
 
-            for(int x=0; x < bitmap.getWidth(); x += 10) {
+            for(int x=0; x < bitmap.getWidth(); x += 1) {
 
                 int color = bitmap.getPixel(x, y);
 
