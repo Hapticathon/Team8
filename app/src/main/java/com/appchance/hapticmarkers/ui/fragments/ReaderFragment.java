@@ -1,5 +1,6 @@
 package com.appchance.hapticmarkers.ui.fragments;
 
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -40,7 +41,7 @@ public class ReaderFragment extends Fragment {
     private static final String SELECTED_MARKER_ARG = "selected_marker_arg";
 
     private static final int CHANGE_PAGE_MARGIN = 150;
-    private static final int TEXT_OFFSET_CHARACTERS = 100;
+    private static final int TEXT_OFFSET_CHARACTERS = 400;
 
     private List<MarkedArea> markedAreas = null;
     private List<Marker> markerList;
@@ -69,16 +70,17 @@ public class ReaderFragment extends Fragment {
         selectedMarker = getArguments().getInt(SELECTED_MARKER_ARG);
         markerList = getArguments().getParcelableArrayList(MARKER_LIST_ARG);
         fullText = getArguments().getString(FULL_TEXT_ARG);
-        startTextPosition = Math.max(markerList.get(selectedMarker).getSelectionStart() - TEXT_OFFSET_CHARACTERS, selectedMarker);
-        endTextPosition = Math.min(markerList.get(selectedMarker).getSelectionEnd() + TEXT_OFFSET_CHARACTERS, fullText.length()-1);
+        startTextPosition = Math.max(markerList.get(selectedMarker).getSelectionStart() - TEXT_OFFSET_CHARACTERS, 0);
+        endTextPosition = Math.min(markerList.get(selectedMarker).getSelectionEnd() + TEXT_OFFSET_CHARACTERS, fullText.length() - 1);
 
         cropText = fullText.substring(startTextPosition, endTextPosition);
         fullTextView.setText(cropText);
-        initText();
+        initSpans();
         return view;
     }
 
-    private void initText() {
+    private void initSpans() {
+
         Spannable spannable = null;
 
         if (fullTextView.getText() instanceof Spannable) {
@@ -88,22 +90,27 @@ public class ReaderFragment extends Fragment {
         }
 
         for(Marker marker : markerList) {
+            int startSelection = getStartSelection(marker);
+            int endSelection = startSelection + (marker.getSelectionEnd() - marker.getSelectionStart());
+
+            if(isMarkerInText(marker)) {
                 BackgroundColorSpan backgroundColorSpan = new BackgroundColorSpan(marker.getType().getBackgroundColor());
                 ForegroundColorSpan foregroundColorSpan = new ForegroundColorSpan(marker.getType().getForegroundColor());
-                spannable.setSpan(backgroundColorSpan, marker.getSelectionStart(), marker.getSelectionEnd(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-                spannable.setSpan(foregroundColorSpan, marker.getSelectionStart(), marker.getSelectionEnd(), Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                spannable.setSpan(backgroundColorSpan, startSelection, endSelection, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                spannable.setSpan(foregroundColorSpan, startSelection, endSelection, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+            }
         }
 
         fullTextView.setText(spannable);
 
     }
 
-    private int getStartSelection(Marker marker){
-        return 0;
+    private boolean isMarkerInText(Marker marker){
+        return marker.getSelectionStart() > startTextPosition && marker.getSelectionEnd() < endTextPosition;
     }
 
-    private int getEndSelection(Marker marker){
-        return 0;
+    private int getStartSelection(Marker marker){
+        return Math.max(marker.getSelectionStart() - startTextPosition, 0);
     }
 
     @Override
@@ -181,28 +188,60 @@ public class ReaderFragment extends Fragment {
 
                     if (event.getY() < CHANGE_PAGE_MARGIN) {
                         //PREVIOUS PAGE
-                        App.vibrateOn();
+                        if(!App.isIsVibrateOn())
+                            App.vibrateOn();
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
                         //NEXT PAGE
-                        App.vibrateOn();
+                        if(!App.isIsVibrateOn())
+                            App.vibrateOn();
                     } else {
-                        App.vibrateOff();
+                        if (MarkerUtil.isInMarkedArea(markedAreas, y, 10)) {
+                            App.vibrateOn();
+                        } else {
+                            App.vibrateOff();
+                        }
                     }
 
-                    if (MarkerUtil.isInMarkedArea(markedAreas, y, 10)) {
-                        App.vibrateOn();
-                    } else {
-                        App.vibrateOff();
-                    }
+
 
                     break;
 
                 case MotionEvent.ACTION_UP:
                     App.vibrateOff();
+                    if (event.getY() < CHANGE_PAGE_MARGIN) {
+                        initPreviousPage();
+                    } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
+                        initNextPage();
+                    }
+                    App.vibrateOff();
                     break;
             }
 
             return false;
+        }
+
+        private void initNextPage(){
+
+            startTextPosition = endTextPosition;
+            endTextPosition = Math.min(startTextPosition + TEXT_OFFSET_CHARACTERS * 2, fullText.length()-1);
+            cropText = fullText.substring(startTextPosition, endTextPosition);
+            fullTextView.setText(cropText);
+            initSpans();
+            animateText();
+        }
+
+        private void initPreviousPage(){
+
+            startTextPosition = Math.max(startTextPosition - TEXT_OFFSET_CHARACTERS * 2, 0);
+            endTextPosition = startTextPosition + TEXT_OFFSET_CHARACTERS * 2;
+            cropText = fullText.substring(startTextPosition, endTextPosition);
+            fullTextView.setText(cropText);
+            initSpans();
+            animateText();
+        }
+
+        private void animateText(){
+            ObjectAnimator.ofFloat(fullTextView, "alpha", 0f, 1f).start();
         }
 
         private final class GestureListener extends GestureDetector.SimpleOnGestureListener {

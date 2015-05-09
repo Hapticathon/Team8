@@ -8,6 +8,7 @@ public class App extends Application {
 
     public static Vibrator vibrator;
     public static final boolean TPAD = false;
+    public static boolean isVibrateOn;
 
     @Override
     public void onCreate() {
@@ -23,10 +24,16 @@ public class App extends Application {
 
     public static void vibrateOn() {
         vibrator.vibrate(10 * 1000);
+        isVibrateOn = true;
     }
 
     public static void vibrateOff() {
         vibrator.cancel();
+        isVibrateOn = false;
+    }
+
+    public static boolean isIsVibrateOn(){
+        return isVibrateOn;
     }
 
 }
