@@ -28,12 +28,13 @@ public class MarkerUtil {
 
             boolean containsMarker = false;
 
-            for(int x=0; x < bitmap.getWidth(); x++) {
+            for(int x=0; x < bitmap.getWidth(); x += 10) {
 
                 int color = bitmap.getPixel(x, y);
 
                 if (spannedColors.contains(color)) {
                     containsMarker = true;
+                    break;
                 }
 
             }

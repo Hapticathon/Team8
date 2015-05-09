@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Spannable;
@@ -16,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
@@ -76,6 +78,7 @@ public class OverviewFragment extends Fragment {
 
         ((MainActivity) getActivity()).getSupportActionBar().setTitle(title);
 
+        Log.d("HM", "start: " + System.currentTimeMillis());
         AssetManager assetManager = getActivity().getAssets();
         InputStream is = null;
         try {
@@ -84,6 +87,8 @@ public class OverviewFragment extends Fragment {
         } catch (IOException e) {
 
         }
+
+        Log.d("HM", "end: " + System.currentTimeMillis());
 
         text.setText(data);
         text.setOnTouchListener(new OnMarkerTouchListener(getActivity(), new OnTapListener() {
@@ -102,10 +107,22 @@ public class OverviewFragment extends Fragment {
             }
         }));
 
+        ViewTreeObserver vto = text.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                new MarkerAreasTask().execute();
+            }
+        });
+
         markers.add(new Marker(MarkerType.GREEN, 340, 480));
         markers.add(new Marker(MarkerType.RED, 1280, 1450));
 
+
+        Log.d("HM", "start: " + System.currentTimeMillis());
         addMarkers(markers);
+        Log.d("HM", "end: " + System.currentTimeMillis());
 
     }
 
@@ -156,12 +173,6 @@ public class OverviewFragment extends Fragment {
 
         public boolean onTouch(View v, MotionEvent event) {
 
-            if (markedAreas == null) {
-                Bitmap bitmap = ViewUtil.getViewBitmap(text);
-                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
-                Log.d("HM", "markedAreas: " + markedAreas.toString());
-            }
-
             if (gestureDetector.onTouchEvent(event)) {
                 return true;
             }
@@ -179,15 +190,27 @@ public class OverviewFragment extends Fragment {
                 case MotionEvent.ACTION_MOVE:
 
                     if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
-                        App.vibrateOn();
+                        if (App.TPAD) {
+                            ((MainActivity) getActivity()).vibrateOn();
+                        } else {
+                            App.vibrateOn();
+                        }
                     } else {
-                        App.vibrateOff();
+                        if (App.TPAD) {
+                            App.vibrateOff();
+                        } else {
+                            ((MainActivity) getActivity()).vibrateOff();
+                        }
                     }
 
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    App.vibrateOff();
+                    if (App.TPAD) {
+                        ((MainActivity) getActivity()).vibrateOff();
+                    } else {
+                        App.vibrateOff();
+                    }
                     break;
             }
 
@@ -205,6 +228,21 @@ public class OverviewFragment extends Fragment {
             }
         }
 
+    }
+
+    private class MarkerAreasTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            if (markedAreas == null) {
+                Bitmap bitmap = ViewUtil.getViewBitmap(text);
+                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
+                Log.d("HM", "markedAreas: " + markedAreas.toString());
+            }
+
+            return null;
+        }
     }
 
 }
