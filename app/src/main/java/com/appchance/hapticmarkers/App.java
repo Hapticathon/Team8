@@ -6,7 +6,8 @@ import android.os.Vibrator;
 
 public class App extends Application {
 
-    private static Vibrator vibrator;
+    public static Vibrator vibrator;
+    public static final boolean TPAD = false;
 
     @Override
     public void onCreate() {
