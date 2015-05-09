@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
+import com.appchance.hapticmarkers.MainActivity;
 import com.appchance.hapticmarkers.R;
 import com.appchance.hapticmarkers.enums.MarkerType;
 import com.appchance.hapticmarkers.models.MarkedArea;
@@ -38,12 +39,26 @@ import butterknife.InjectView;
 
 public class OverviewFragment extends Fragment {
 
+    private static final String TITLE_ARG = "title_arg";
+    private static final String PATH_ARG = "path_arg";
+
     @InjectView(R.id.text)
     TextView text;
 
     private ArrayList<Marker> markers = new ArrayList<>();
     private List<MarkedArea> markedAreas = null;
     private String data = "";
+    private String title;
+    private String path;
+
+    public static OverviewFragment getInstance(String title, String path){
+        Bundle bundle = new Bundle();
+        bundle.putString(TITLE_ARG, title);
+        bundle.putString(PATH_ARG, path);
+        OverviewFragment fragment = new OverviewFragment();
+        fragment.setArguments(bundle);
+        return fragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,6 +70,11 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        
+        title = getArguments().getString(TITLE_ARG);
+        path = getArguments().getString(PATH_ARG);
+
+        ((MainActivity) getActivity()).getSupportActionBar().setTitle(title);
 
         AssetManager assetManager = getActivity().getAssets();
         InputStream is = null;

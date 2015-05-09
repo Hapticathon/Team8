@@ -2,21 +2,13 @@ package com.appchance.hapticmarkers;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
-import com.appchance.hapticmarkers.ui.fragments.OverviewFragment;
+import com.appchance.hapticmarkers.ui.fragments.DocumentsFragment;
 
 import butterknife.ButterKnife;
-import butterknife.InjectView;
-import me.grantland.widget.AutofitHelper;
 import nxr.tpad.lib.TPadImpl;
-import nxr.tpad.lib.consts.TPadVibration;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
-        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new OverviewFragment()).commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new DocumentsFragment()).commit();
 
         if (App.TPAD) {
             tpad = new TPadImpl(this);
