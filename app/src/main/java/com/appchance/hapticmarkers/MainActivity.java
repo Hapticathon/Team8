@@ -10,15 +10,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.appchance.hapticmarkers.ui.fragments.OverviewFragment;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import me.grantland.widget.AutofitHelper;
 import nxr.tpad.lib.TPadImpl;
 import nxr.tpad.lib.consts.TPadVibration;
 
 public class MainActivity extends AppCompatActivity {
 
-    @InjectView(R.id.text)
-    TextView text;
 
     private TPadImpl tpad;
 
@@ -28,16 +29,11 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
 
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new OverviewFragment()).commit();
+
         if (App.TPAD) {
             tpad = new TPadImpl(this);
         }
-
-        text.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                return false;
-            }
-        });
 
     }
 
