@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.appchance.hapticmarkers.MainActivity;
 import com.appchance.hapticmarkers.R;
 import com.appchance.hapticmarkers.models.Document;
 import com.appchance.hapticmarkers.ui.adapters.DocumentViewHolder;
@@ -36,6 +37,8 @@ public class DocumentsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+
+        ((MainActivity) getActivity()).setTitle(R.string.app_name);
 
         documentList.clear();
         documentList.add(new Document("Testowy dokument", "text.html"));

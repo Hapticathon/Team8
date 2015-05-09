@@ -197,9 +197,9 @@ public class OverviewFragment extends Fragment {
                         }
                     } else {
                         if (App.TPAD) {
-                            App.vibrateOff();
-                        } else {
                             ((MainActivity) getActivity()).vibrateOff();
+                        } else {
+                            App.vibrateOff();
                         }
                     }
 
