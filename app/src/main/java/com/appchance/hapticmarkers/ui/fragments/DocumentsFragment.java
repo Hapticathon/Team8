@@ -38,8 +38,6 @@ public class DocumentsFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        ((MainActivity) getActivity()).setTitle(R.string.app_name);
-
         documentList.clear();
         documentList.add(new Document("Testowy dokument", "text.html"));
         documentList.add(new Document("Wyceny dla Pawła", "text.html"));
@@ -62,4 +60,9 @@ public class DocumentsFragment extends Fragment {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((MainActivity) getActivity()).setTitle(R.string.app_name);
+    }
 }

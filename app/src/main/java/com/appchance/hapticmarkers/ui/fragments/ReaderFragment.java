@@ -42,7 +42,7 @@ public class ReaderFragment extends Fragment {
     private static final String SELECTED_MARKER_ARG = "selected_marker_arg";
 
     private static final int CHANGE_PAGE_MARGIN = 150;
-    private static final int TEXT_OFFSET_CHARACTERS = 400;
+    private static final int TEXT_OFFSET_CHARACTERS = 500;
 
     private List<MarkedArea> markedAreas = null;
     private List<Marker> markerList;
@@ -50,6 +50,7 @@ public class ReaderFragment extends Fragment {
     private String cropText;
     private int startTextPosition, endTextPosition;
     private int selectedMarker;
+    private float oldX, oldY;
 
     @InjectView(R.id.tv_full_text) TextView fullTextView;
 
@@ -137,7 +138,15 @@ public class ReaderFragment extends Fragment {
 
             @Override
             public void onSwipeRight(int y) {
-                App.vibrateOff();
+                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+
+                if (index != -1) {
+                    Marker marker = getVisibleMarker();
+                    if(marker != null) {
+                        MarkerType markerType = marker.getType();
+                        App.vibratePattern(markerType.getPattern());
+                    }
+                }
             }
         }));
 
@@ -181,7 +190,7 @@ public class ReaderFragment extends Fragment {
 
             if (markedAreas == null) {
                 Bitmap bitmap = ViewUtil.getViewBitmap(fullTextView);
-                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap);
+                markedAreas = MarkerUtil.getMarkedAreasFromBitmap(bitmap, 15);
                 Log.d("HM", "markedAreas: " + markedAreas.toString());
             }
 
@@ -196,28 +205,34 @@ public class ReaderFragment extends Fragment {
             switch (action) {
 
                 case MotionEvent.ACTION_DOWN:
-
+                    oldX = event.getX();
+                    oldY = event.getY();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
 
-                    if (event.getY() < CHANGE_PAGE_MARGIN) {
+                    float newX = event.getX();
+                    float newY = event.getY();
+
+                    int deltaY = (int) (oldY - newY);
+
+                    if (event.getY() < CHANGE_PAGE_MARGIN && deltaY > 0) {
                         //PREVIOUS PAGE
                         if(!App.isIsVibrateOn()) {
-                            if (App.TPAD) {
-                                ((MainActivity) getActivity()).vibrateOn();
-                            } else {
+//                            if (App.TPAD) {
+//                                ((MainActivity) getActivity()).vibrateOn();
+//                            } else {
                                 App.vibrateOn();
-                            }
+//                            }
                         }
-                    } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
+                    } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN && deltaY < 0 && oldY > 0) {
                         //NEXT PAGE
                         if(!App.isIsVibrateOn()) {
-                            if (App.TPAD) {
-                                ((MainActivity) getActivity()).vibrateOn();
-                            } else {
+//                            if (App.TPAD) {
+//                                ((MainActivity) getActivity()).vibrateOn();
+//                            } else {
                                 App.vibrateOn();
-                            }
+//                            }
                         }
                     } else {
                         if (MarkerUtil.isInMarkedArea(markedAreas, y, 10)) {
@@ -234,14 +249,14 @@ public class ReaderFragment extends Fragment {
                             }
                         }
                     }
+
+                    oldX = newX;
+                    oldY = newY;
+
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    if (App.TPAD) {
-                        ((MainActivity) getActivity()).vibrateOff();
-                    } else {
-                        App.vibrateOff();
-                    }
+
                     if (event.getY() < CHANGE_PAGE_MARGIN) {
                         initPreviousPage();
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN) {
@@ -253,6 +268,12 @@ public class ReaderFragment extends Fragment {
                     } else {
                         App.vibrateOff();
                     }
+                    oldX = 0;
+                    oldY = 0;
+                    break;
+
+                case MotionEvent.ACTION_CANCEL:
+                    App.vibrateOff();
                     break;
             }
 
@@ -262,8 +283,8 @@ public class ReaderFragment extends Fragment {
         private void initNextPage(){
 
             markedAreas = null;
-            startTextPosition = endTextPosition;
-            endTextPosition = Math.min(startTextPosition + TEXT_OFFSET_CHARACTERS * 2, fullText.length()-1);
+            startTextPosition = Math.min(endTextPosition, fullText.length() - TEXT_OFFSET_CHARACTERS * 2);
+            endTextPosition = Math.min(startTextPosition + TEXT_OFFSET_CHARACTERS * 2, fullText.length());
             cropText = fullText.substring(startTextPosition, endTextPosition);
             fullTextView.setText(cropText);
             initSpans();

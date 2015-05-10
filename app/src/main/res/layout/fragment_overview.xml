@@ -1,15 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="32dp">
+
+        <ImageView
+            android:id="@+id/iv_flow_marker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_launcher"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
     <com.appchance.hapticmarkers.ui.views.SizeAdjustingTextView
         android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginLeft="100dp"
+        android:gravity="center_vertical"
         android:padding="32dp"
         android:text="test" />
 
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:background="#AA000000"
+        android:clickable="true"
+        android:visibility="gone">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progressBar" />
+
+    </LinearLayout>
+
+</FrameLayout>

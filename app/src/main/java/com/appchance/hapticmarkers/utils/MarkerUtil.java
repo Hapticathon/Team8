@@ -12,6 +12,10 @@ import java.util.List;
 public class MarkerUtil {
 
     public static List<MarkedArea> getMarkedAreasFromBitmap(Bitmap bitmap) {
+       return getMarkedAreasFromBitmap(bitmap, 1);
+    }
+
+    public static List<MarkedArea> getMarkedAreasFromBitmap(Bitmap bitmap, int xVel) {
 
         List<MarkedArea> markedAreas = new ArrayList<>();
 
@@ -28,7 +32,7 @@ public class MarkerUtil {
 
             boolean containsMarker = false;
 
-            for(int x=0; x < bitmap.getWidth(); x += 1) {
+            for(int x=0; x < bitmap.getWidth(); x += xVel) {
 
                 int color = bitmap.getPixel(x, y);
 
@@ -73,7 +77,7 @@ public class MarkerUtil {
 
     public static int getMarkerIndex(List<MarkedArea> markedAreas, int y) {
 
-        int margin = 10;
+        int margin = 50;
 
         for (MarkedArea markedArea : markedAreas) {
 

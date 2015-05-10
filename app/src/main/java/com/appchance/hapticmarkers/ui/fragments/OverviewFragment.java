@@ -1,5 +1,9 @@
 package com.appchance.hapticmarkers.ui.fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -18,6 +22,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
@@ -46,6 +52,12 @@ public class OverviewFragment extends Fragment {
 
     @InjectView(R.id.text)
     TextView text;
+
+    @InjectView(R.id.ll_loading)
+    LinearLayout loadingLayout;
+
+    @InjectView(R.id.iv_flow_marker)
+    ImageView flowMarker;
 
     private ArrayList<Marker> markers = new ArrayList<>();
     private List<MarkedArea> markedAreas = null;
@@ -118,7 +130,7 @@ public class OverviewFragment extends Fragment {
 
         markers.add(new Marker(MarkerType.GREEN, 540, 680));
         markers.add(new Marker(MarkerType.RED, 2877, 3049));
-        markers.add(new Marker(MarkerType.BLUE, 6077, 6449));
+        markers.add(new Marker(MarkerType.BLUE, 5996, 6433));
 
 
         Log.d("HM", "start: " + System.currentTimeMillis());
@@ -185,11 +197,14 @@ public class OverviewFragment extends Fragment {
             switch (action) {
 
                 case MotionEvent.ACTION_DOWN:
-
+                    flowMarker.setVisibility(View.VISIBLE);
+                    flowMarker.setY(event.getY());
+                    ObjectAnimator.ofFloat(flowMarker, "scaleX", 0f, 1f).start();
+                    ObjectAnimator.ofFloat(flowMarker, "scaleY", 0f, 1f).start();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-
+                    flowMarker.setY(event.getY() - flowMarker.getHeight() / 2);
                     if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
                         if (App.TPAD) {
                             if (MarkerUtil.getMarkerIndex(markedAreas, y) == 1) {
@@ -216,13 +231,27 @@ public class OverviewFragment extends Fragment {
                     } else {
                         App.vibrateOff();
                     }
+                    hideFlowMarker();
                     break;
             }
 
             return true;
         }
 
+        private void hideFlowMarker(){
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 1f, 0f);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(flowMarker, "scaleY", 1f, 0f);
 
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(scaleX, scaleY);
+            set.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    flowMarker.setVisibility(View.GONE);
+                }
+            });
+            set.start();
+        }
 
         private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
 
@@ -235,7 +264,30 @@ public class OverviewFragment extends Fragment {
 
     }
 
+    private void showLoading(){
+        loadingLayout.setVisibility(View.VISIBLE);
+        ObjectAnimator.ofFloat(loadingLayout, "alpha", 0f, 1f).start();
+    }
+
+    private void hideLoading(){
+        loadingLayout.setVisibility(View.VISIBLE);
+        ObjectAnimator oa = ObjectAnimator.ofFloat(loadingLayout, "alpha", 1f, 0f);
+        oa.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                loadingLayout.setVisibility(View.GONE);
+            }
+        });
+        oa.start();
+    }
+
     private class MarkerAreasTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showLoading();
+        }
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -247,6 +299,12 @@ public class OverviewFragment extends Fragment {
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            hideLoading();
         }
     }
 
