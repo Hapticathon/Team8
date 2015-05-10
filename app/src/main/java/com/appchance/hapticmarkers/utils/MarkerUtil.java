@@ -75,6 +75,21 @@ public class MarkerUtil {
         return false;
     }
 
+    public static MarkedArea getMarkedArea(List<MarkedArea> markedAreas, int y, int margin) {
+
+        for (MarkedArea markedArea : markedAreas) {
+
+            int startY = markedArea.getStartY() - margin;
+            int endY = markedArea.getEndY() + margin;
+
+            if (startY - margin < y && endY > y) {
+                return markedArea;
+            }
+        }
+
+        return null;
+    }
+
     public static int getMarkerIndex(List<MarkedArea> markedAreas, int y) {
 
         int margin = 50;
