@@ -86,7 +86,7 @@ public class OverviewFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-        showLoading();
+//        showLoading();
 
         title = getArguments().getString(TITLE_ARG);
         path = getArguments().getString(PATH_ARG);
@@ -108,15 +108,6 @@ public class OverviewFragment extends Fragment {
 
             }
         }));
-
-        ViewTreeObserver vto = text.getViewTreeObserver();
-        vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                new MarkerAreasTask().execute();
-            }
-        });
 
         markers.add(new Marker(MarkerType.GREEN, 540, 680));
         markers.add(new Marker(MarkerType.RED, 2877, 3049));
@@ -290,7 +281,17 @@ public class OverviewFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Spannable spannable) {
+
             text.setText(spannable);
+
+            ViewTreeObserver vto = text.getViewTreeObserver();
+            vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    text.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    new MarkerAreasTask().execute();
+                }
+            });
         }
 
     }
