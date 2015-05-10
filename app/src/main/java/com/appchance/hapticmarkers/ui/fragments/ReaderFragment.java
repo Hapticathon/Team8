@@ -43,7 +43,7 @@ public class ReaderFragment extends Fragment {
     private static final String SELECTED_MARKER_ARG = "selected_marker_arg";
 
     private static final int CHANGE_PAGE_MARGIN = 150;
-    private static final int TEXT_OFFSET_CHARACTERS = 500;
+    private static final int TEXT_OFFSET_CHARACTERS = 450;
 
     private List<MarkedArea> markedAreas = null;
     private List<Marker> markerList;
@@ -74,8 +74,8 @@ public class ReaderFragment extends Fragment {
         selectedMarker = getArguments().getInt(SELECTED_MARKER_ARG);
         markerList = getArguments().getParcelableArrayList(MARKER_LIST_ARG);
         fullText = getArguments().getString(FULL_TEXT_ARG);
-        startTextPosition = Math.max(markerList.get(selectedMarker).getSelectionStart() - TEXT_OFFSET_CHARACTERS, 0);
-        endTextPosition = Math.min(markerList.get(selectedMarker).getSelectionEnd() + TEXT_OFFSET_CHARACTERS, fullText.length() - 1);
+        startTextPosition = Math.max(markerList.get(selectedMarker).getSelectionStart() - TEXT_OFFSET_CHARACTERS/2, 0);
+        endTextPosition = Math.min(markerList.get(selectedMarker).getSelectionEnd() + TEXT_OFFSET_CHARACTERS/2, fullText.length() - 1);
 
         cropText = fullText.substring(startTextPosition, endTextPosition);
         fullTextView.setText(cropText);
