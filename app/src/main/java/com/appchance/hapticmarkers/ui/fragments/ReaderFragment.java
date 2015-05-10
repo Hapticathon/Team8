@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.appchance.hapticmarkers.App;
@@ -53,6 +54,7 @@ public class ReaderFragment extends Fragment {
     private float oldX, oldY;
 
     @InjectView(R.id.tv_full_text) TextView fullTextView;
+    @InjectView(R.id.progress) ProgressBar progress;
 
     public static ReaderFragment getInstance(String fullText, ArrayList<Marker> markerList, int selectedMarker){
         Bundle bundle = new Bundle();
@@ -82,6 +84,12 @@ public class ReaderFragment extends Fragment {
     }
 
     private void initSpans() {
+
+        int prog = (int) (((float) endTextPosition / (float) fullText.length()) * 100);
+        Log.d("HM", "startText: " + startTextPosition + " endText: " + endTextPosition + " len: " + fullText.length());
+//        progress.setProgress(prog);
+
+        ObjectAnimator.ofInt(progress, "progress", progress.getProgress(), prog).start();
 
         Spannable spannable = null;
 
