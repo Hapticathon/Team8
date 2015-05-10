@@ -66,6 +66,7 @@ public class OverviewFragment extends Fragment {
     private String title;
     private String path;
     private AnimatorSet florMarkerAnimationSet;
+    private boolean isFlowMarkerVisible = false;
 
     public static OverviewFragment getInstance(String title, String path){
         Bundle bundle = new Bundle();
@@ -176,8 +177,23 @@ public class OverviewFragment extends Fragment {
 
                 case MotionEvent.ACTION_MOVE:
                     //flowMarker.setY(event.getY() - flowMarker.getHeight() / 2);
+
+                    if (MarkerUtil.isInMarkedArea(markedAreas, y, 20)) {
+                        MarkerType type = MarkerType.GREEN;
+                        int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+
+                        if (index != -1) {
+                            type = markers.get(index).getType();
+                        }
+
+                        MarkedArea markedArea = MarkerUtil.getMarkedArea(markedAreas, y, 20);
+                        int y2 = (int) (markedArea.getStartY() + (markedArea.getEndY() - markedArea.getStartY()) / 2f);
+                        showFlowMarker(y2, type);
+                    } else {
+                        hideFlowMarker();
+                    }
+
                     if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
-                        showFlowMarker(y);
                         if (App.TPAD) {
                             if (MarkerUtil.getMarkerIndex(markedAreas, y) == 1) {
                                 ((MainActivity) getActivity()).vibrateOn(0.5f);
@@ -188,7 +204,6 @@ public class OverviewFragment extends Fragment {
                             App.vibrateOn();
                         }
                     } else {
-                        hideFlowMarker();
                         if (App.TPAD) {
                             ((MainActivity) getActivity()).vibrateOff();
                         } else {
@@ -211,26 +226,36 @@ public class OverviewFragment extends Fragment {
             return true;
         }
 
-        private void showFlowMarker(int y){
-            if(flowMarker.getVisibility() == View.INVISIBLE) {
-                flowMarker.setVisibility(View.VISIBLE);
-                flowMarker.setY(y);
+        private void showFlowMarker(int y, MarkerType type) {
+            if(!isFlowMarkerVisible) {
+                isFlowMarkerVisible = true;
+                flowMarker.setY(y - flowMarker.getHeight() / 2f);
+                flowMarker.setImageResource(type.getMarkerResource());
 
                 if(florMarkerAnimationSet== null) {
                     florMarkerAnimationSet = new AnimatorSet();
                 }
                 else {
                     florMarkerAnimationSet.cancel();
+                    florMarkerAnimationSet = new AnimatorSet();
                 }
                 ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 0f, 1f);
                 ObjectAnimator scaleY = ObjectAnimator.ofFloat(flowMarker, "scaleY", 0f, 1f);
+                florMarkerAnimationSet.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        flowMarker.setVisibility(View.VISIBLE);
+                    }
+                });
                 florMarkerAnimationSet.playTogether(scaleX, scaleY);
                 florMarkerAnimationSet.start();
             }
         }
 
-        private void hideFlowMarker(){
-            if(flowMarker.getVisibility() == View.VISIBLE) {
+        private void hideFlowMarker() {
+            if(isFlowMarkerVisible) {
+                isFlowMarkerVisible = false;
                 ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 1f, 0f);
                 ObjectAnimator scaleY = ObjectAnimator.ofFloat(flowMarker, "scaleY", 1f, 0f);
 
@@ -238,6 +263,7 @@ public class OverviewFragment extends Fragment {
                     florMarkerAnimationSet = new AnimatorSet();
                 } else {
                     florMarkerAnimationSet.cancel();
+                    florMarkerAnimationSet = new AnimatorSet();
                 }
 
                 florMarkerAnimationSet.playTogether(scaleX, scaleY);
