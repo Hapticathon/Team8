@@ -10,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.Spannable;
 import android.text.Spanned;
@@ -84,25 +85,14 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        
+
+        showLoading();
+
         title = getArguments().getString(TITLE_ARG);
         path = getArguments().getString(PATH_ARG);
 
         ((MainActivity) getActivity()).getSupportActionBar().setTitle(title);
 
-        Log.d("HM", "start: " + System.currentTimeMillis());
-        AssetManager assetManager = getActivity().getAssets();
-        InputStream is = null;
-        try {
-            is = assetManager.open("text.html");
-            data = IOUtils.toString(is);
-        } catch (IOException e) {
-
-        }
-
-        Log.d("HM", "end: " + System.currentTimeMillis());
-
-        text.setText(data);
         text.setOnTouchListener(new OnMarkerTouchListener(getActivity(), new OnTapListener() {
             @Override
             public void onTapListener(int y) {
@@ -132,22 +122,18 @@ public class OverviewFragment extends Fragment {
         markers.add(new Marker(MarkerType.RED, 2877, 3049));
         markers.add(new Marker(MarkerType.BLUE, 5996, 6433));
 
-
-        Log.d("HM", "start: " + System.currentTimeMillis());
-        addMarkers(markers);
-        Log.d("HM", "end: " + System.currentTimeMillis());
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+               new MainTask().execute();
+            }
+        }, 100);
 
     }
 
-    private void addMarkers(List<Marker> markers) {
+    private Spannable addMarkers(List<Marker> markers) {
 
-        Spannable spannable = null;
-
-        if (text.getText() instanceof Spannable) {
-            spannable = (Spannable) text.getText();
-        } else {
-            spannable = Spannable.Factory.getInstance().newSpannable(text.getText());
-        }
+        Spannable spannable = Spannable.Factory.getInstance().newSpannable(data);
 
         for (Marker marker : markers) {
 
@@ -162,8 +148,7 @@ public class OverviewFragment extends Fragment {
 
         }
 
-        text.setText(spannable);
-
+        return spannable;
     }
 
     public interface OnTapListener {
@@ -281,13 +266,36 @@ public class OverviewFragment extends Fragment {
         oa.start();
     }
 
-    private class MarkerAreasTask extends AsyncTask<Void, Void, Void> {
+    private class MainTask extends AsyncTask<Void, Void, Spannable> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            showLoading();
         }
+
+        @Override
+        protected Spannable doInBackground(Void... voids) {
+
+            AssetManager assetManager = getActivity().getAssets();
+            InputStream is = null;
+            try {
+                is = assetManager.open("text.html");
+                data = IOUtils.toString(is);
+            } catch (IOException e) {
+
+            }
+
+            return addMarkers(markers);
+        }
+
+        @Override
+        protected void onPostExecute(Spannable spannable) {
+            text.setText(spannable);
+        }
+
+    }
+
+    private class MarkerAreasTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {

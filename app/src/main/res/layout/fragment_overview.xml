@@ -14,7 +14,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_launcher"
-            android:visibility="gone"/>
+            android:visibility="gone" />
 
     </FrameLayout>
 
@@ -25,21 +25,23 @@
         android:layout_marginLeft="100dp"
         android:gravity="center_vertical"
         android:padding="32dp"
-        android:text="test" />
+        android:text="" />
 
     <LinearLayout
         android:id="@+id/ll_loading"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
         android:background="#AA000000"
         android:clickable="true"
-        android:visibility="gone">
+        android:gravity="center"
+        android:visibility="visible">
 
-        <ProgressBar
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/progressBar" />
+            android:text="Ładowanie..."
+            android:textColor="#fff"
+            android:textSize="14sp" />
 
     </LinearLayout>
 
