@@ -86,8 +86,6 @@ public class OverviewFragment extends Fragment {
     public void onStart() {
         super.onStart();
 
-//        showLoading();
-
         title = getArguments().getString(TITLE_ARG);
         path = getArguments().getString(PATH_ARG);
 
