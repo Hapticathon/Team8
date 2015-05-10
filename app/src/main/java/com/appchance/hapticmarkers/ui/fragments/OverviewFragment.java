@@ -19,6 +19,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,6 +88,9 @@ public class OverviewFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        setHasOptionsMenu(true);
+        ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         title = getArguments().getString(TITLE_ARG);
         path = getArguments().getString(PATH_ARG);
@@ -109,9 +113,9 @@ public class OverviewFragment extends Fragment {
             }
         }));
 
-        markers.add(new Marker(MarkerType.GREEN, 540, 680));
-        markers.add(new Marker(MarkerType.RED, 2877, 3049));
-        markers.add(new Marker(MarkerType.BLUE, 5996, 6433));
+        markers.add(new Marker(MarkerType.GREEN, 2877, 3049));
+        markers.add(new Marker(MarkerType.RED, 6500, 7000));
+        markers.add(new Marker(MarkerType.BLUE, 10400, 10800));
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -120,6 +124,17 @@ public class OverviewFragment extends Fragment {
             }
         }, 100);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().getSupportFragmentManager().popBackStack();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private Spannable addMarkers(List<Marker> markers) {

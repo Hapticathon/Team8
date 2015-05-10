@@ -15,6 +15,7 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -64,6 +65,24 @@ public class ReaderFragment extends Fragment {
         ReaderFragment fragment = new ReaderFragment();
         fragment.setArguments(bundle);
         return fragment;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        setHasOptionsMenu(true);
+        ((MainActivity)getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().getSupportFragmentManager().popBackStack();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Nullable
@@ -137,7 +156,7 @@ public class ReaderFragment extends Fragment {
 
                 if (index != -1) {
                     Marker marker = getVisibleMarker();
-                    if(marker != null) {
+                    if (marker != null) {
                         MarkerType markerType = marker.getType();
                         App.vibratePattern(markerType.getPattern());
                     }
@@ -150,7 +169,7 @@ public class ReaderFragment extends Fragment {
 
                 if (index != -1) {
                     Marker marker = getVisibleMarker();
-                    if(marker != null) {
+                    if (marker != null) {
                         MarkerType markerType = marker.getType();
                         App.vibratePattern(markerType.getPattern());
                     }
