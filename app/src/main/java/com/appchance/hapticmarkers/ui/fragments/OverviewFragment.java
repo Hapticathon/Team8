@@ -136,7 +136,7 @@ public class OverviewFragment extends Fragment {
 
         }));
 
-        markers.add(new Marker(MarkerType.GREEN, 2577, 3049));
+        markers.add(new Marker(MarkerType.GREEN, 2243, 2703));
         markers.add(new Marker(MarkerType.RED, 5500, 6100));
         markers.add(new Marker(MarkerType.BLUE, 8400, 8900));
 

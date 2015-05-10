@@ -39,10 +39,10 @@ public class DocumentsFragment extends Fragment {
         super.onStart();
 
         documentList.clear();
-        documentList.add(new Document("Testowy dokument", "text.html"));
-        documentList.add(new Document("Wyceny dla Pawła", "text.html"));
-        documentList.add(new Document("Pan Tadeusz", "text.html"));
-        documentList.add(new Document("Sialalala", "text.html"));
+        documentList.add(new Document("Haptic technology", "text.html"));
+        documentList.add(new Document("Apache License 2.0", "text.html"));
+        documentList.add(new Document("Modern technology", "text.html"));
+        documentList.add(new Document("TPad specification", "text.html"));
 
         lvDocuments.setAdapter(new EasyAdapter<Document>(getActivity(), DocumentViewHolder.class, documentList));
         lvDocuments.setOnItemClickListener(new AdapterView.OnItemClickListener() {

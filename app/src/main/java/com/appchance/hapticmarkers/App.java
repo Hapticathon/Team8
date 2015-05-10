@@ -31,6 +31,10 @@ public class App extends Application {
         isVibrateOn = true;
     }
 
+    public static void vibrateClear() {
+        isVibrateOn = false;
+    }
+
     public static void vibrateOff() {
         vibrator.cancel();
         isVibrateOn = false;

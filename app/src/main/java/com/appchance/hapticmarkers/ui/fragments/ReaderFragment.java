@@ -243,7 +243,7 @@ public class ReaderFragment extends Fragment {
 //                                ((MainActivity) getActivity && !isVibrated()).vibrateOn();
 //                            } else {
                                 isVibrated = true;
-                                App.vibrateOn(0.7f);
+                                App.vibrateOn(0.1f);
 //                            }
                         }
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN && deltaY < 0 && oldY > 0) {
@@ -253,10 +253,11 @@ public class ReaderFragment extends Fragment {
 //                                ((MainActivity) getActivity()).vibrateOn();
 //                            } else {
                                 isVibrated = true;
-                                App.vibrateOn(0.7f);
+                                App.vibrateOn(0.1f);
 //                            }
                         }
                     } else {
+                        App.vibrateClear();
                         isVibrated = false;
                         if (MarkerUtil.isInMarkedArea(markedAreas, y, 10)) {
                             if (App.TPAD) {
