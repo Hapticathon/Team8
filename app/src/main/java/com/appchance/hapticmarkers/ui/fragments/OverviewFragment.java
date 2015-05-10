@@ -65,6 +65,7 @@ public class OverviewFragment extends Fragment {
     private String data = "";
     private String title;
     private String path;
+    private AnimatorSet florMarkerAnimationSet;
 
     public static OverviewFragment getInstance(String title, String path){
         Bundle bundle = new Bundle();
@@ -116,7 +117,7 @@ public class OverviewFragment extends Fragment {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-               new MainTask().execute();
+                new MainTask().execute();
             }
         }, 100);
 
@@ -173,15 +174,12 @@ public class OverviewFragment extends Fragment {
             switch (action) {
 
                 case MotionEvent.ACTION_DOWN:
-                    flowMarker.setVisibility(View.VISIBLE);
-                    flowMarker.setY(event.getY());
-                    ObjectAnimator.ofFloat(flowMarker, "scaleX", 0f, 1f).start();
-                    ObjectAnimator.ofFloat(flowMarker, "scaleY", 0f, 1f).start();
                     break;
 
                 case MotionEvent.ACTION_MOVE:
-                    flowMarker.setY(event.getY() - flowMarker.getHeight() / 2);
+                    //flowMarker.setY(event.getY() - flowMarker.getHeight() / 2);
                     if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
+                        showFlowMarker(y);
                         if (App.TPAD) {
                             if (MarkerUtil.getMarkerIndex(markedAreas, y) == 1) {
                                 ((MainActivity) getActivity()).vibrateOn(0.5f);
@@ -192,6 +190,7 @@ public class OverviewFragment extends Fragment {
                             App.vibrateOn();
                         }
                     } else {
+                        hideFlowMarker();
                         if (App.TPAD) {
                             ((MainActivity) getActivity()).vibrateOff();
                         } else {
@@ -214,19 +213,44 @@ public class OverviewFragment extends Fragment {
             return true;
         }
 
-        private void hideFlowMarker(){
-            ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 1f, 0f);
-            ObjectAnimator scaleY = ObjectAnimator.ofFloat(flowMarker, "scaleY", 1f, 0f);
+        private void showFlowMarker(int y){
+            if(flowMarker.getVisibility() == View.INVISIBLE) {
+                flowMarker.setVisibility(View.VISIBLE);
+                flowMarker.setY(y);
 
-            AnimatorSet set = new AnimatorSet();
-            set.playTogether(scaleX, scaleY);
-            set.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    flowMarker.setVisibility(View.GONE);
+                if(florMarkerAnimationSet== null) {
+                    florMarkerAnimationSet = new AnimatorSet();
                 }
-            });
-            set.start();
+                else {
+                    florMarkerAnimationSet.cancel();
+                }
+                ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 0f, 1f);
+                ObjectAnimator scaleY = ObjectAnimator.ofFloat(flowMarker, "scaleY", 0f, 1f);
+                florMarkerAnimationSet.playTogether(scaleX, scaleY);
+                florMarkerAnimationSet.start();
+            }
+        }
+
+        private void hideFlowMarker(){
+            if(flowMarker.getVisibility() == View.VISIBLE) {
+                ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 1f, 0f);
+                ObjectAnimator scaleY = ObjectAnimator.ofFloat(flowMarker, "scaleY", 1f, 0f);
+
+                if (florMarkerAnimationSet == null) {
+                    florMarkerAnimationSet = new AnimatorSet();
+                } else {
+                    florMarkerAnimationSet.cancel();
+                }
+
+                florMarkerAnimationSet.playTogether(scaleX, scaleY);
+                florMarkerAnimationSet.addListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        flowMarker.setVisibility(View.INVISIBLE);
+                    }
+                });
+                florMarkerAnimationSet.start();
+            }
         }
 
         private final class GestureListener extends GestureDetector.SimpleOnGestureListener {
