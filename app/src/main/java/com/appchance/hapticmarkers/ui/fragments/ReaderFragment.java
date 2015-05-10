@@ -152,27 +152,19 @@ public class ReaderFragment extends Fragment {
         fullTextView.setOnTouchListener(new OnMarkerTouchListener(getActivity(), new OnSwipeListener() {
             @Override
             public void onSwipeLeft(int y) {
-                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
-
-                if (index != -1) {
-                    Marker marker = getVisibleMarker();
-                    if (marker != null) {
-                        MarkerType markerType = marker.getType();
-                        App.vibratePattern(markerType.getPattern());
-                    }
+                Marker marker = getVisibleMarker();
+                if (marker != null) {
+                    MarkerType markerType = marker.getType();
+                    App.vibratePattern(markerType.getPattern());
                 }
             }
 
             @Override
             public void onSwipeRight(int y) {
-                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
-
-                if (index != -1) {
-                    Marker marker = getVisibleMarker();
-                    if (marker != null) {
-                        MarkerType markerType = marker.getType();
-                        App.vibratePattern(markerType.getPattern());
-                    }
+                Marker marker = getVisibleMarker();
+                if (marker != null) {
+                    MarkerType markerType = marker.getType();
+                    App.vibratePattern(markerType.getPattern());
                 }
             }
         }));

@@ -38,14 +38,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void vibrateOn() {
-        tpad.sendVibration(TPadVibration.SQUARE, 200, 1);
+        tpad.sendVibration(TPadVibration.SAWTOOTH, 200, 1);
 //        tpad.sendFriction(1f);
     }
 
-    public void vibrateOn(float amp) {
-        tpad.sendVibration(TPadVibration.SQUARE, 200, amp);
-//        tpad.sendFriction(1f);
-    }
+//    public void vibrateOn(float amp) {
+//        tpad.sendVibration(TPadVibration.SQUARE, 200, amp);
+////        tpad.sendFriction(1f);
+//    }
 
     public void vibrateOff() {
         tpad.turnOff();

@@ -111,11 +111,34 @@ public class OverviewFragment extends Fragment {
                 }
 
             }
+
+            @Override
+            public void onSwipeLeft(int y) {
+                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+
+                if (index != -1) {
+                    Marker marker = markers.get(index);
+                    MarkerType markerType = marker.getType();
+                    App.vibratePattern(markerType.getPattern());
+                }
+            }
+
+            @Override
+            public void onSwipeRight(int y) {
+                int index = MarkerUtil.getMarkerIndex(markedAreas, y);
+
+                if (index != -1) {
+                    Marker marker = markers.get(index);
+                    MarkerType markerType = marker.getType();
+                    App.vibratePattern(markerType.getPattern());
+                }
+            }
+
         }));
 
-        markers.add(new Marker(MarkerType.GREEN, 2877, 3049));
-        markers.add(new Marker(MarkerType.RED, 6500, 7000));
-        markers.add(new Marker(MarkerType.BLUE, 10400, 10800));
+        markers.add(new Marker(MarkerType.GREEN, 2577, 3049));
+        markers.add(new Marker(MarkerType.RED, 5500, 6100));
+        markers.add(new Marker(MarkerType.BLUE, 8400, 8900));
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -159,6 +182,10 @@ public class OverviewFragment extends Fragment {
 
     public interface OnTapListener {
         void onTapListener(int y);
+
+        void onSwipeLeft(int y);
+
+        void onSwipeRight(int y);
     }
 
     public class OnMarkerTouchListener implements View.OnTouchListener {
@@ -173,6 +200,14 @@ public class OverviewFragment extends Fragment {
 
         public void onTap(MotionEvent event) {
             onTapListener.onTapListener((int) event.getY());
+        }
+
+        public void onSwipeLeft(int y) {
+            onTapListener.onSwipeLeft(y);
+        }
+
+        public void onSwipeRight(int y) {
+            onTapListener.onSwipeRight(y);
         }
 
         public boolean onTouch(View v, MotionEvent event) {
@@ -210,11 +245,7 @@ public class OverviewFragment extends Fragment {
 
                     if (MarkerUtil.isInMarkedArea(markedAreas, y, 15)) {
                         if (App.TPAD) {
-                            if (MarkerUtil.getMarkerIndex(markedAreas, y) == 1) {
-                                ((MainActivity) getActivity()).vibrateOn(0.5f);
-                            } else {
-                                ((MainActivity) getActivity()).vibrateOn();
-                            }
+                            ((MainActivity) getActivity()).vibrateOn();
                         } else {
                             App.vibrateOn();
                         }
@@ -247,11 +278,13 @@ public class OverviewFragment extends Fragment {
                 flowMarker.setY(y - flowMarker.getHeight() / 2f);
                 flowMarker.setImageResource(type.getMarkerResource());
 
-                if(florMarkerAnimationSet== null) {
+                if(florMarkerAnimationSet == null) {
                     florMarkerAnimationSet = new AnimatorSet();
                 }
                 else {
-                    florMarkerAnimationSet.cancel();
+//                    if (!florMarkerAnimationSet.isRunning()) {
+                        florMarkerAnimationSet.cancel();
+//                    }
                     florMarkerAnimationSet = new AnimatorSet();
                 }
                 ObjectAnimator scaleX = ObjectAnimator.ofFloat(flowMarker, "scaleX", 0f, 1f);
@@ -288,6 +321,7 @@ public class OverviewFragment extends Fragment {
                         flowMarker.setVisibility(View.INVISIBLE);
                     }
                 });
+                florMarkerAnimationSet.setStartDelay(200);
                 florMarkerAnimationSet.start();
             }
         }
@@ -299,6 +333,30 @@ public class OverviewFragment extends Fragment {
                 onTap(e);
                 return true;
             }
+
+            private static final int SWIPE_DISTANCE_THRESHOLD = 100;
+            private static final int SWIPE_VELOCITY_THRESHOLD = 100;
+
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                float distanceX = e2.getX() - e1.getX();
+                float distanceY = e2.getY() - e1.getY();
+                if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > SWIPE_DISTANCE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (distanceX > 0) {
+                        onSwipeRight((int) e1.getY());
+                    } else {
+                        onSwipeLeft((int) e1.getY());
+                    }
+                    return true;
+                }
+                return false;
+            }
+
         }
 
     }
