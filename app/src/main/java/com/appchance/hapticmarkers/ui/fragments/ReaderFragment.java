@@ -53,6 +53,7 @@ public class ReaderFragment extends Fragment {
     private int startTextPosition, endTextPosition;
     private int selectedMarker;
     private float oldX, oldY;
+    private boolean isVibrated = false;
 
     @InjectView(R.id.tv_full_text) TextView fullTextView;
     @InjectView(R.id.progress) ProgressBar progress;
@@ -237,23 +238,26 @@ public class ReaderFragment extends Fragment {
 
                     if (event.getY() < CHANGE_PAGE_MARGIN && deltaY > 0) {
                         //PREVIOUS PAGE
-                        if(!App.isIsVibrateOn()) {
+                        if(!App.isIsVibrateOn() && !isVibrated) {
 //                            if (App.TPAD) {
-//                                ((MainActivity) getActivity()).vibrateOn();
+//                                ((MainActivity) getActivity && !isVibrated()).vibrateOn();
 //                            } else {
-                                App.vibrateOn();
+                                isVibrated = true;
+                                App.vibrateOn(0.7f);
 //                            }
                         }
                     } else if (event.getY() > fullTextView.getHeight() - CHANGE_PAGE_MARGIN && deltaY < 0 && oldY > 0) {
                         //NEXT PAGE
-                        if(!App.isIsVibrateOn()) {
+                        if(!App.isIsVibrateOn() && !isVibrated) {
 //                            if (App.TPAD) {
 //                                ((MainActivity) getActivity()).vibrateOn();
 //                            } else {
-                                App.vibrateOn();
+                                isVibrated = true;
+                                App.vibrateOn(0.7f);
 //                            }
                         }
                     } else {
+                        isVibrated = false;
                         if (MarkerUtil.isInMarkedArea(markedAreas, y, 10)) {
                             if (App.TPAD) {
                                 ((MainActivity) getActivity()).vibrateOn();
