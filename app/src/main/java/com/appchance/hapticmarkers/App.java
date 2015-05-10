@@ -23,7 +23,11 @@ public class App extends Application {
     }
 
     public static void vibrateOn() {
-        vibrator.vibrate(10 * 1000);
+        vibrateOn(10);
+    }
+
+    public static void vibrateOn(float seconds){
+        vibrator.vibrate((long) (seconds * 1000));
         isVibrateOn = true;
     }
 
